@@ -1,0 +1,23 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - .dart_tool/**
+    - '**/*.g.dart'
+  errors:
+    invalid_assignment: error
+    missing_return: error
+    dead_code: warning
+
+linter:
+  rules:
+    avoid_print: true
+    cancel_subscriptions: true
+    close_sinks: true
+    directives_ordering: true
+    no_duplicate_case_values: true
+    prefer_final_fields: true
+    prefer_const_constructors: true
+    require_trailing_commas: true
+    unawaited_futures: true
