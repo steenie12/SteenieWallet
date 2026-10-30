@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 
 import '../../core/coins/coin_registry.dart';
 
-import '../../core/security/wallet_crypto.dart';
-import '../../storage/secure_wallet_storage.dart';
 import '../../wallet/wallet_service.dart';
+import '../../wallet/wallet_vault_service.dart';
 import '../../widgets/security_warning.dart';
 
 class CreateWalletScreen extends StatefulWidget {
-  const CreateWalletScreen({super.key});
+  const CreateWalletScreen({super.key, this.onWalletReady});
+
+  final ValueChanged<WalletVault>? onWalletReady;
 
   @override
   State<CreateWalletScreen> createState() => _CreateWalletScreenState();
@@ -19,8 +20,7 @@ class CreateWalletScreen extends StatefulWidget {
 
 class _CreateWalletScreenState extends State<CreateWalletScreen> {
   final WalletService _walletService = WalletService();
-  final WalletCrypto _crypto = WalletCrypto();
-  final SecureWalletStorage _storage = SecureWalletStorage();
+  final WalletVaultService _vaultService = WalletVaultService();
 
   final List<TextEditingController> _wordControllers =
       List.generate(3, (_) => TextEditingController());
@@ -42,7 +42,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
 
   Future<void> _checkExistingWallet() async {
     try {
-      final exists = await _storage.hasWallet();
+      final exists = await _vaultService.hasWallet();
       if (!mounted) return;
       setState(() {
         _existingWallet = exists;
@@ -197,30 +197,11 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
     setState(() => _saving = true);
 
     try {
-      // Only the encrypted JSON payload is written to secure storage.
-      final walletData = jsonEncode({
-        'version': 1,
-        'network': 'bitcoin-testnet',
-        'mnemonic': phrase,
-        'createdAt': DateTime.now().toUtc().toIso8601String(),
-      });
-
-      final encryptedPayload = await _crypto.encrypt(
-        plaintext: walletData,
+      // The shared vault validates the phrase and encrypts it locally.
+      final vault = await _vaultService.importWallet(
+        mnemonic: phrase,
         password: password,
       );
-
-      // Recheck before writing to avoid intentionally replacing a wallet.
-      if (await _storage.hasWallet()) {
-        if (!mounted) return;
-        setState(() => _existingWallet = true);
-        _showMessage(
-          'A wallet already exists. No existing wallet was replaced.',
-        );
-        return;
-      }
-
-      await _storage.saveEncryptedWallet(encryptedPayload);
 
       if (!mounted) return;
       setState(() {
@@ -231,6 +212,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
       });
 
       _showMessage('Recovery words verified and encrypted wallet saved.');
+      widget.onWalletReady?.call(vault);
     } catch (_) {
       if (mounted) {
         _showMessage(
