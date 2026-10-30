@@ -65,19 +65,25 @@ class SteenieWalletApp extends StatelessWidget {
 }
 
 class WalletEntryGate extends StatefulWidget {
-  const WalletEntryGate({super.key});
+  const WalletEntryGate({
+    super.key,
+    this.vaultService,
+  });
+
+  final WalletVaultService? vaultService;
 
   @override
   State<WalletEntryGate> createState() => _WalletEntryGateState();
 }
 
 class _WalletEntryGateState extends State<WalletEntryGate> {
-  final WalletVaultService _vault = WalletVaultService();
+  late final WalletVaultService _vault;
   bool? _hasWallet;
 
   @override
   void initState() {
     super.initState();
+    _vault = widget.vaultService ?? WalletVaultService();
     _checkWallet();
   }
 

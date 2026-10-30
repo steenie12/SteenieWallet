@@ -1,15 +1,27 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:steenie_wallet/app.dart';
 import 'package:steenie_wallet/features/onboarding/create_wallet_screen.dart';
+import 'package:steenie_wallet/wallet/wallet_vault_service.dart';
+
+class _FakeWalletVaultService extends WalletVaultService {
+  @override
+  Future<bool> hasWallet() async => false;
+}
 
 void main() {
-  testWidgets('SteenieWallet opens the wallet creation screen', (
-    tester,
-  ) async {
-    await tester.pumpWidget(const SteenieWalletApp());
-    await tester.pump();
+  testWidgets('Wallet entry gate opens creation screen when no wallet exists',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: WalletEntryGate(
+          vaultService: _FakeWalletVaultService(),
+        ),
+      ),
+    );
 
-    expect(find.byType(SteenieWalletApp), findsOneWidget);
+    await tester.pumpAndSettle();
+
     expect(find.byType(CreateWalletScreen), findsOneWidget);
   });
 }
