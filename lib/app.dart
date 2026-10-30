@@ -11,7 +11,7 @@ class SteenieWalletApp extends StatelessWidget {
     const background = Color(0xFF101114);
 
     return MaterialApp(
-      title: 'Steenie Wallet',
+      title: 'VELARIO WALLET',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

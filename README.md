@@ -1,4 +1,4 @@
-# Steenie Wallet
+# VELARIO WALLET
 
 An open-source cryptocurrency wallet project, starting with Bitcoin testnet.
 

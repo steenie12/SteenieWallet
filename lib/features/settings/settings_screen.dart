@@ -105,7 +105,7 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   ListTile(
                     leading: Icon(Icons.account_balance_wallet_outlined),
-                    title: Text('Steenie Wallet'),
+                    title: Text('VELARIO WALLET'),
                     subtitle: Text('Version 0.1.0 · Development'),
                   ),
                   Divider(height: 1),

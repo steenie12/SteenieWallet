@@ -1,4 +1,4 @@
-name: Build Steenie Wallet APK
+name: VELARIO WALLET Android Build
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    name: Analyze, test and build APK
+    name: Analyze, test and build VELARIO WALLET
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -31,13 +31,18 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Generate Android project files
+      - name: Generate Android project
         run: |
           flutter create \
             --platforms=android \
             --project-name steenie_wallet \
             --org com.steenie.wallet \
             .
+
+      - name: Set VELARIO launcher name
+        run: |
+          sed -i 's/android:label="[^"]*"/android:label="VELARIO WALLET"/' \
+            android/app/src/main/AndroidManifest.xml
 
       - name: Restore project package configuration
         run: git checkout -- pubspec.yaml
@@ -57,7 +62,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: steenie-wallet-debug-apk
+          name: velario-wallet-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
           if-no-files-found: error
           retention-days: 7

@@ -1,7 +1,7 @@
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'Steenie Wallet';
+  static const String appName = 'VELARIO WALLET';
   static const String appVersion = '0.1.0';
   static const int buildNumber = 1;
 

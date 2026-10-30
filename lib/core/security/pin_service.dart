@@ -26,7 +26,7 @@ class PinService {
       if (!await canUseBiometrics()) return false;
 
       return await _authentication.authenticate(
-        localizedReason: 'Unlock Steenie Wallet',
+        localizedReason: 'Unlock VELARIO WALLET',
       );
     } catch (_) {
       return false;

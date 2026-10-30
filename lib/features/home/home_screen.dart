@@ -13,7 +13,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             Icon(Icons.currency_bitcoin, color: Color(0xFFF7931A)),
             SizedBox(width: 8),
-            Text('Steenie Wallet'),
+            Text('VELARIO WALLET'),
           ],
         ),
         actions: [
