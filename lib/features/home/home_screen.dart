@@ -1,4 +1,3 @@
-import '../../widgets/velario_loading_animation.dart';
 import 'package:flutter/material.dart';
 
 import '../../wallet/evm_address_service.dart';

@@ -4,9 +4,12 @@ import '../receive/receive_screen.dart';
 import '../send/send_screen.dart';
 import '../settings/settings_screen.dart';
 import 'home_screen.dart';
+import '../../wallet/wallet_vault_service.dart';
 
 class WalletNavigation extends StatefulWidget {
-  const WalletNavigation({super.key});
+  const WalletNavigation({super.key, required this.vault});
+
+  final WalletVault vault;
 
   @override
   State<WalletNavigation> createState() => _WalletNavigationState();
@@ -15,11 +18,11 @@ class WalletNavigation extends StatefulWidget {
 class _WalletNavigationState extends State<WalletNavigation> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _screens = [
-    HomeScreen(),
-    ReceiveScreen(),
-    SendScreen(),
-    SettingsScreen(),
+  late final List<Widget> _screens = [
+    HomeScreen(vault: widget.vault),
+    const ReceiveScreen(),
+    const SendScreen(),
+    const SettingsScreen(),
   ];
 
   static const List<NavigationDestination> _destinations = [

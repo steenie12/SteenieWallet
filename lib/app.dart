@@ -1,6 +1,6 @@
+import 'features/home/wallet_navigation.dart';
 import 'package:flutter/material.dart';
 
-import 'features/home/home_screen.dart';
 import 'features/onboarding/create_wallet_screen.dart';
 import 'features/onboarding/unlock_wallet_screen.dart';
 import 'wallet/wallet_vault_service.dart';
@@ -97,7 +97,7 @@ class _WalletEntryGateState extends State<WalletEntryGate> {
     setState(() => _hasWallet = true);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => HomeScreen(vault: vault),
+        builder: (_) => WalletNavigation(vault: vault),
       ),
     );
   }
