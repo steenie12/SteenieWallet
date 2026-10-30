@@ -18,6 +18,7 @@ class UnlockWalletScreen extends StatefulWidget {
 
 class _UnlockWalletScreenState extends State<UnlockWalletScreen> {
   final _passwordController = TextEditingController();
+  final _pinController = TextEditingController();
   final _vaultService = WalletVaultService();
 
   bool _loading = false;
@@ -27,6 +28,7 @@ class _UnlockWalletScreenState extends State<UnlockWalletScreen> {
   @override
   void dispose() {
     _passwordController.dispose();
+    _pinController.dispose();
     super.dispose();
   }
 
@@ -62,6 +64,36 @@ class _UnlockWalletScreenState extends State<UnlockWalletScreen> {
       if (mounted) {
         setState(() => _loading = false);
       }
+    }
+  }
+
+
+  Future<void> _unlockWithPin() async {
+    if (_loading) return;
+    final pin = _pinController.text;
+
+    if (!RegExp(r'^\d{6}$').hasMatch(pin)) {
+      setState(() => _error = 'Enter your six-digit PIN.');
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      final vault = await _vaultService.unlockWithPin(pin: pin);
+      if (!mounted) return;
+      _pinController.clear();
+      widget.onUnlocked(vault);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _error = 'PIN unlock failed. Check your PIN or use your password.';
+      });
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -126,6 +158,28 @@ class _UnlockWalletScreenState extends State<UnlockWalletScreen> {
                               : Icons.visibility_off_outlined,
                         ),
                       ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+                  TextField(
+                    controller: _pinController,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    maxLength: 6,
+                    autocorrect: false,
+                    decoration: const InputDecoration(
+                      labelText: 'Six-digit PIN',
+                      prefixIcon: Icon(Icons.pin_outlined),
+                    ),
+                    onSubmitted: (_) => _unlockWithPin(),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: OutlinedButton(
+                      onPressed: _loading ? null : _unlockWithPin,
+                      child: const Text('Unlock with PIN'),
                     ),
                   ),
                   if (_error != null) ...[

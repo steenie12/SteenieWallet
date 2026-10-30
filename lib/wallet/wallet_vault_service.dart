@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:cryptography/cryptography.dart';
 
 import '../core/security/wallet_crypto.dart';
 import '../storage/secure_wallet_storage.dart';
@@ -154,6 +157,81 @@ class WalletVaultService {
           ? walletIdValue
           : 'legacy-wallet',
     );
+  }
+
+
+  Future<void> configurePin({
+    required String pin,
+    required String walletPassword,
+  }) async {
+    if (!RegExp(r'^\d{6}$').hasMatch(pin)) {
+      throw ArgumentError('PIN must contain exactly six digits.');
+    }
+
+    final salt = List<int>.generate(
+      16,
+      (_) => Random.secure().nextInt(256),
+    );
+
+    final algorithm = Pbkdf2(
+      macAlgorithm: Hmac.sha256(),
+      iterations: 600000,
+      bits: 256,
+    );
+
+    final key = await algorithm.deriveKey(
+      secretKey: SecretKey(pin.codeUnits),
+      nonce: salt,
+    );
+    final verifier = await key.extractBytes();
+
+    await _storage.saveWalletSalt(base64Encode(salt));
+    await _storage.savePinVerifier(base64Encode(verifier));
+    // flutter_secure_storage protects this credential using Android
+    // secure storage. The PIN itself is never stored.
+    await _storage.savePinUnlockPassword(walletPassword);
+  }
+
+  Future<WalletVault> unlockWithPin({required String pin}) async {
+    if (!RegExp(r'^\d{6}$').hasMatch(pin)) {
+      throw ArgumentError('Enter your six-digit PIN.');
+    }
+
+    final saltText = await _storage.readWalletSalt();
+    final verifierText = await _storage.readPinVerifier();
+    final protectedPassword = await _storage.readPinUnlockPassword();
+
+    if (saltText == null ||
+        verifierText == null ||
+        protectedPassword == null) {
+      throw StateError('PIN unlock has not been configured.');
+    }
+
+    final salt = base64Decode(saltText);
+    final expected = base64Decode(verifierText);
+
+    final algorithm = Pbkdf2(
+      macAlgorithm: Hmac.sha256(),
+      iterations: 600000,
+      bits: 256,
+    );
+
+    final key = await algorithm.deriveKey(
+      secretKey: SecretKey(pin.codeUnits),
+      nonce: salt,
+    );
+    final actual = await key.extractBytes();
+
+    var difference = actual.length ^ expected.length;
+    for (var i = 0; i < actual.length && i < expected.length; i++) {
+      difference |= actual[i] ^ expected[i];
+    }
+
+    if (difference != 0) {
+      throw StateError('Incorrect PIN.');
+    }
+
+    return unlockWallet(password: protectedPassword);
   }
 
   Future<bool> hasWallet() => _storage.hasWallet();

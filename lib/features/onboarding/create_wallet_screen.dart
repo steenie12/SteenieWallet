@@ -171,6 +171,74 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
     return result;
   }
 
+
+  Future<String?> _askForPin() async {
+    final pinController = TextEditingController();
+    final confirmController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Create your wallet PIN'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Choose a six-digit PIN for quick unlocking. '
+                'Keep your wallet password and recovery phrase safe too.',
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: pinController,
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                maxLength: 6,
+                autofocus: true,
+                decoration: const InputDecoration(labelText: 'Six-digit PIN'),
+                validator: (v) => v == null ||
+                        !RegExp(r'^\d{6}$').hasMatch(v)
+                    ? 'Enter exactly six digits'
+                    : null,
+              ),
+              TextFormField(
+                controller: confirmController,
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                maxLength: 6,
+                decoration: const InputDecoration(labelText: 'Confirm PIN'),
+                validator: (v) => v != pinController.text
+                    ? 'PINs do not match'
+                    : null,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState?.validate() ?? false) {
+                Navigator.pop(dialogContext, pinController.text);
+              }
+            },
+            child: const Text('Set PIN'),
+          ),
+        ],
+      ),
+    );
+
+    pinController.dispose();
+    confirmController.dispose();
+    return result;
+  }
+
   Future<void> _verifyAndSave() async {
     final phrase = _phrase;
     if (phrase == null || _saving) return;
@@ -193,6 +261,9 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
     final password = await _askForPassword();
     if (!mounted || password == null) return;
 
+    final pin = await _askForPin();
+    if (!mounted || pin == null) return;
+
     setState(() => _saving = true);
 
     try {
@@ -200,6 +271,11 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
       final vault = await _vaultService.importWallet(
         mnemonic: phrase,
         password: password,
+      );
+
+      await _vaultService.configurePin(
+        pin: pin,
+        walletPassword: password,
       );
 
       if (!mounted) return;
@@ -210,7 +286,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
         _existingWallet = true;
       });
 
-      _showMessage('Recovery words verified and encrypted wallet saved.');
+      _showMessage('Wallet encrypted and PIN configured successfully.');
       widget.onWalletReady?.call(vault);
     } catch (_) {
       if (mounted) {

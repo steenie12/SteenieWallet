@@ -9,6 +9,7 @@ class SecureWalletStorage {
   static const String _encryptedWalletKey = 'encrypted_wallet_v1';
   static const String _walletSaltKey = 'wallet_salt_v1';
   static const String _pinVerifierKey = 'pin_verifier_v1';
+  static const String _pinUnlockPasswordKey = 'pin_unlock_password_v1';
 
   /// Saves an encrypted wallet payload. Never pass a plaintext seed here.
   Future<void> saveEncryptedWallet(String encryptedPayload) async {
@@ -43,6 +44,14 @@ class SecureWalletStorage {
     return _storage.read(key: _pinVerifierKey);
   }
 
+  Future<void> savePinUnlockPassword(String password) async {
+    await _storage.write(key: _pinUnlockPasswordKey, value: password);
+  }
+
+  Future<String?> readPinUnlockPassword() {
+    return _storage.read(key: _pinUnlockPasswordKey);
+  }
+
   Future<bool> hasWallet() async {
     final payload = await readEncryptedWallet();
     return payload != null && payload.isNotEmpty;
@@ -52,5 +61,6 @@ class SecureWalletStorage {
     await _storage.delete(key: _encryptedWalletKey);
     await _storage.delete(key: _walletSaltKey);
     await _storage.delete(key: _pinVerifierKey);
+    await _storage.delete(key: _pinUnlockPasswordKey);
   }
 }
