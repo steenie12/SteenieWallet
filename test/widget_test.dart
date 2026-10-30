@@ -10,18 +10,22 @@ class _FakeWalletVaultService extends WalletVaultService {
 }
 
 void main() {
-  testWidgets('Wallet entry gate opens creation screen when no wallet exists',
-      (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: WalletEntryGate(
-          vaultService: _FakeWalletVaultService(),
+  testWidgets(
+    'Wallet entry gate opens creation screen when no wallet exists',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: WalletEntryGate(
+            vaultService: _FakeWalletVaultService(),
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.pumpAndSettle();
+      // Allow the asynchronous wallet check to finish.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.byType(CreateWalletScreen), findsOneWidget);
-  });
+      expect(find.byType(CreateWalletScreen), findsOneWidget);
+    },
+  );
 }
