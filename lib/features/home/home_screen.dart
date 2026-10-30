@@ -84,11 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) setState(() => _loading = false);
   }
 
-  String get _shortAddress {
-    final value = _address;
-    if (value == null || value.length < 12) return 'Address unavailable';
-    return '${value.substring(0, 8)}...${value.substring(value.length - 6)}';
-  }
 
   void _copyAddress() {
     final address = _address;
