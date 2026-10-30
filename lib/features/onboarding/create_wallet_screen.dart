@@ -256,7 +256,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
                 padding: const EdgeInsets.all(22),
                 children: [
                   const Icon(
-                    Icons.shield_lock_outlined,
+                    Icons.security_outlined,
                     size: 64,
                     color: Color(0xFF42DDB2),
                   ),
@@ -270,7 +270,7 @@ class _CreateWalletScreenState extends State<CreateWalletScreen> {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Kakushi is being developed as a self-custody wallet. '
+                    'VELARIO WALLET is being developed as a self-custody wallet. '
                     'Your recovery phrase is highly sensitive.',
                   ),
                   const SizedBox(height: 22),
